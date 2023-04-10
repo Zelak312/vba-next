@@ -78,15 +78,31 @@ renderfunc_t GetRenderFunc(int mode, int type);
 inline static long max(int p, int q) { return p > q ? p : q; }
 inline static long min(int p, int q) { return p < q ? p : q; }
 
-uint8_t *rom = 0;
-uint8_t *bios = 0;
-uint8_t *vram = 0;
-uint16_t *pix = 0;
-uint8_t *oam = 0;
-uint8_t *ioMem = 0;
-uint8_t *internalRAM = 0;
-uint8_t *workRAM = 0;
-uint8_t *paletteRAM = 0;
+
+
+uint8_t oam[0x400];
+uint8_t ioMem[0x400];
+uint8_t paletteRAM[0x400];
+uint8_t internalRAM[0x8000];
+
+#ifdef USE_STATIC_WRAM
+uint8_t vram[0x20000];
+uint8_t workRAM[0x40000];
+uint8_t bios[0x4000];
+uint16_t pix[2 * PIX_BUFFER_SCREEN_WIDTH * 160];
+uint8_t libretro_save_buf[LIBRETRO_SAVE_BUF_LEN];
+uint8_t rom[32 * 1024 * 1024];
+#else
+uint8_t *vram;//[0x20000];
+uint8_t *workRAM;//[0x40000];
+uint8_t *bios;//[0x4000];
+uint16_t *pix;//[2 * PIX_BUFFER_SCREEN_WIDTH * 160];
+uint8_t *libretro_save_buf;//[0x20000+0x2000];
+uint8_t *rom;//[32*1024*1024]
+#endif
+
+
+
 
 int renderfunc_mode = 0;
 int renderfunc_type = 0;
@@ -8895,7 +8911,7 @@ static bool CPUIsELF(const char *file)
 
 void CPUCleanUp (void)
 {
-   if(rom != NULL)
+   /* if(rom != NULL)
    {
       memalign_free(rom);
       rom = NULL;
@@ -8947,18 +8963,18 @@ void CPUCleanUp (void)
    {
       memalign_free(ioMem);
       ioMem = NULL;
-   }
+   } */
 }
 
-static bool CPUSetupBuffers(void)
+bool CPUSetupBuffers(void)
 {
 	romSize = 0x2000000;
 	if(rom != NULL)
 		CPUCleanUp();
 
 	//systemSaveUpdateCounter = SYSTEM_SAVE_NOT_UPDATED;
+	/* rom = (uint8_t *)memalign_alloc_aligned(0x2000000);
 
-	rom = (uint8_t *)memalign_alloc_aligned(0x2000000);
 	workRAM = (uint8_t *)memalign_alloc_aligned(0x40000);
 	bios = (uint8_t *)memalign_alloc_aligned(0x4000);
 	internalRAM = (uint8_t *)memalign_alloc_aligned(0x8000);
@@ -8966,9 +8982,8 @@ static bool CPUSetupBuffers(void)
 	vram = (uint8_t *)memalign_alloc_aligned(0x20000);
 	oam = (uint8_t *)memalign_alloc_aligned(0x400);
 	pix = (uint16_t *)memalign_alloc_aligned(4 * PIX_BUFFER_SCREEN_WIDTH * 160);
-	ioMem = (uint8_t *)memalign_alloc_aligned(0x400);
-
-	memset(rom, 0, 0x2000000);
+	ioMem = (uint8_t *)memalign_alloc_aligned(0x400); */
+	// memset(rom, 0, 0x2000000);
 	memset(workRAM, 1, 0x40000);
 	memset(bios, 1, 0x4000);
 	memset(internalRAM, 1, 0x8000);
@@ -9062,7 +9077,7 @@ static int utilGetSize(int size)
 
    return res;
 }
-
+#if 0
 static uint8_t *utilLoad(const char *file,
       bool (*accept)(const char *), uint8_t *data, int &size)
 {
@@ -9093,8 +9108,9 @@ static uint8_t *utilLoad(const char *file,
    filestream_close(fp);
    return image;
 }
+#endif
 
-
+#if 0
 #ifdef LOAD_FROM_MEMORY
 int CPULoadRomData(const char *data, int size)
 {
@@ -9167,6 +9183,7 @@ int CPULoadRom(const char * file)
 
    return romSize;
 }
+#endif
 #endif
 
 void doMirroring (bool b)
@@ -14440,10 +14457,12 @@ int cheatsCheckKeys(u32 keys, u32 extended)
       case GSA_32_BIT_WRITE_IOREGS:
         if (cheatsList[i].address<=0x3FF)
         {
+#if 0
           if (((cheatsList[i].address & 0x3FC) != 0x6) && ((cheatsList[i].address & 0x3FC) != 0x130))
             ioMem[cheatsList[i].address & 0x3FC]= (cheatsList[i].value & 0xFFFF);
           if ((((cheatsList[i].address & 0x3FC)+2) != 0x6) && ((cheatsList[i].address & 0x3FC) +2) != 0x130)
             ioMem[(cheatsList[i].address & 0x3FC) + 2 ]= ((cheatsList[i].value>>16 ) & 0xFFFF);
+#endif
         }
         break;
       case GSA_8_BIT_IF_TRUE3:

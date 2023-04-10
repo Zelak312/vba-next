@@ -4,10 +4,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <libretro.h>
+// #include <libretro.h>
 #include <vfs/vfs.h>
-#include <streams/file_stream.h>
-#include "libretro_core_options.h"
+// #include <streams/file_stream.h>
+// #include "libretro_core_options.h"
 
 #include "../src/system.h"
 #include "../src/port.h"
@@ -17,6 +17,7 @@
 #include "../src/sound.h"
 #include "../src/globals.h"
 
+#if 0
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t poll_cb;
@@ -145,7 +146,7 @@ void retro_set_environment(retro_environment_t cb)
 
    libretro_set_core_options(environ_cb);
 
-   vfs_iface_info.required_interface_version = 2;
+   vfs_iface_info.required_interface_version = 1;
    vfs_iface_info.iface                      = NULL;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VFS_INTERFACE, &vfs_iface_info))
       filestream_vfs_init(&vfs_iface_info);
@@ -220,6 +221,7 @@ void retro_init(void)
 }
 
 static unsigned serialize_size = 0;
+#endif
 
 typedef struct
 {
@@ -342,7 +344,7 @@ static const ini_t gbaover[256] = {
 			{"Zoku Bokura no Taiyou - Taiyou Shounen Django (Japan)",		"U32J",	0,	0,	1,	0,	0}
 };
 
-static void load_image_preferences (void)
+void load_image_preferences (void)
 {
 	char buffer[5];
 	buffer[0] = rom[0xac];
@@ -351,8 +353,8 @@ static void load_image_preferences (void)
 	buffer[3] = rom[0xaf];
 	buffer[4] = 0;
 
-   if (log_cb)
-      log_cb(RETRO_LOG_DEBUG, "GameID in ROM is: %s\n", buffer);
+   // if (log_cb)
+      // log_cb(RETRO_LOG_DEBUG, "GameID in ROM is: %s\n", buffer);
 
 	bool found = false;
 	int found_no = 0;
@@ -369,8 +371,8 @@ static void load_image_preferences (void)
 
 	if(found)
 	{
-      if (log_cb)
-         log_cb(RETRO_LOG_DEBUG, "Found ROM in vba-over list.\n");
+      // if (log_cb)
+         // log_cb(RETRO_LOG_DEBUG, "Found ROM in vba-over list.\n");
 
 		enableRtc = gbaover[found_no].rtcEnabled;
 
@@ -384,13 +386,13 @@ static void load_image_preferences (void)
 		mirroringEnable = gbaover[found_no].mirroringEnabled;
 	}
 
-   if (log_cb)
+   /* if (log_cb)
    {
       log_cb(RETRO_LOG_DEBUG, "RTC = %d.\n", enableRtc);
       log_cb(RETRO_LOG_DEBUG, "flashSize = %d.\n", flashSize);
       log_cb(RETRO_LOG_DEBUG, "cpuSaveType = %d.\n", cpuSaveType);
       log_cb(RETRO_LOG_DEBUG, "mirroringEnable = %d.\n", mirroringEnable);
-   }
+   } */
 }
 
 #if USE_FRAME_SKIP
@@ -416,7 +418,7 @@ static int get_frameskip_code(void)
 
 static void gba_init(void)
 {
-   struct retro_variable var = { 0 };
+   // struct retro_variable var = { 0 };
    bool rtc = false;
  
    cpuSaveType = 0;
@@ -429,7 +431,7 @@ static void gba_init(void)
    if(flashSize == 0x10000 || flashSize == 0x20000)
       flashSetSize(flashSize);
 
-   var.key = "vbanext_rtc";
+   /* var.key = "vbanext_rtc";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -439,13 +441,13 @@ static void gba_init(void)
       else
          if(enableRtc)
             rtc = true;  
-   }
+   } */
 
    rtcEnable(rtc);
 
-   doMirroring(mirroringEnable);
+   // doMirroring(mirroringEnable);
 
-   soundSetSampleRate(32000);
+   soundSetSampleRate(50000);
 
 #if HAVE_HLE_BIOS
    bool usebios = false;
@@ -472,15 +474,17 @@ static void gba_init(void)
 
    soundReset();
 
-   uint8_t * state_buf = (uint8_t*)malloc(2000000);
+/* uint8_t * state_buf = (uint8_t*)malloc(2000000);
    serialize_size = CPUWriteState(state_buf, 2000000);
-   free(state_buf);
+   free(state_buf); */
 
 #if USE_FRAME_SKIP
    SetFrameskip(get_frameskip_code());
 #endif
 
 }
+
+#if 0
 
 void retro_deinit(void)
 {
@@ -779,6 +783,7 @@ unsigned retro_get_region(void)
    return RETRO_REGION_NTSC;
 }
 
+
 void systemOnWriteDataToSoundBuffer(int16_t *finalWave, int length)
 {
    int frames = length >> 1;
@@ -806,3 +811,4 @@ void systemMessage(const char* fmt, ...)
    log_cb(RETRO_LOG_INFO, "%s\n", buffer);
    va_end(ap);
 }
+#endif
