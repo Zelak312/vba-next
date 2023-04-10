@@ -8969,21 +8969,7 @@ void CPUCleanUp (void)
 bool CPUSetupBuffers(void)
 {
 	romSize = 0x2000000;
-	if(rom != NULL)
-		CPUCleanUp();
-
-	//systemSaveUpdateCounter = SYSTEM_SAVE_NOT_UPDATED;
-	/* rom = (uint8_t *)memalign_alloc_aligned(0x2000000);
-
-	workRAM = (uint8_t *)memalign_alloc_aligned(0x40000);
-	bios = (uint8_t *)memalign_alloc_aligned(0x4000);
-	internalRAM = (uint8_t *)memalign_alloc_aligned(0x8000);
-	paletteRAM = (uint8_t *)memalign_alloc_aligned(0x400);
-	vram = (uint8_t *)memalign_alloc_aligned(0x20000);
-	oam = (uint8_t *)memalign_alloc_aligned(0x400);
-	pix = (uint16_t *)memalign_alloc_aligned(4 * PIX_BUFFER_SCREEN_WIDTH * 160);
-	ioMem = (uint8_t *)memalign_alloc_aligned(0x400); */
-	// memset(rom, 0, 0x2000000);
+    CPUCleanUp();
 	memset(workRAM, 1, 0x40000);
 	memset(bios, 1, 0x4000);
 	memset(internalRAM, 1, 0x8000);
@@ -8993,17 +8979,9 @@ bool CPUSetupBuffers(void)
 	memset(pix, 1, 4 * PIX_BUFFER_SCREEN_WIDTH * 160);
 	memset(ioMem, 1, 0x400);
 
-	if(rom == NULL || workRAM == NULL || bios == NULL ||
-	   internalRAM == NULL || paletteRAM == NULL ||
-	   vram == NULL || oam == NULL || pix == NULL || ioMem == NULL) {
-		CPUCleanUp();
-		return false;
-	}
-
 	flashInit();
 	eepromInit();
 
-	//CPUUpdateRenderBuffers(true);
 #if !THREADED_RENDERER
 	memset(line[Layer_BG0], -1, 240 * sizeof(u32));
 	memset(line[Layer_BG1], -1, 240 * sizeof(u32));
