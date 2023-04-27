@@ -1980,9 +1980,6 @@ static void apply_muting (void)
 
 static void remake_stereo_buffer (void)
 {
-	if ( !ioMem )
-		return;
-
 	// Clears pointers kept to old stereo_buffer
 	gba_pcm_init();
 
